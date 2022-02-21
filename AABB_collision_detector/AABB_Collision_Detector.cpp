@@ -67,21 +67,28 @@ namespace scu {
 			Event sesex(-1, v0 - extend, EventType::START);
 			Event seeex(-1, v1 + extend, EventType::END);
 			
-			//searching is still slow.
 			auto index = tryInsertEvent(sesex, i, searching_index);
+			auto indexs = tryInsertEvent(ses, i, searching_index);
+			auto indexe = tryInsertEvent(see, i, searching_index);
+			auto indexEnd = tryInsertEvent(seeex, i, searching_index);
 			if (index == std::numeric_limits<unsigned int>::max())
 				return false;
-			for (; index < searching_index.size(); index++) {
-				auto& currentIndex = searching_index[index];
-				auto& currentEvent = es[currentIndex];
-				auto& anotherIndex = currentEvent._type == EventType::END ? _events_dimension_index[i][currentEvent.origin_index] : _events_dimension_index[i][currentEvent.origin_index + _num_element];
-				auto& anotherEvent = es[anotherIndex];
-				if (currentEvent > seeex) break;
-				else if (anotherEvent >= sesex && currentEvent <= seeex && anotherEvent._type == EventType::START) continue;
-				else if (!(currentEvent >= see || currentEvent <= ses)) 
-					jointAxis.push_back(currentEvent.origin_index);
-				else if (currentEvent <= ses && anotherEvent >= see && anotherEvent <= seeex) 
-					jointAxis.push_back(currentEvent.origin_index);
+			//secondly searching is still slow.
+			{
+				for (; index < indexs; index++) {
+					auto& currentEvent = es[searching_index[index]];
+					if (currentEvent._type == EventType::START) {
+						auto& anotherIndex = esIndex[currentEvent.origin_index + _num_element];
+						auto& anotherEvent = es[anotherIndex];
+						if (anotherEvent <= seeex && anotherEvent >= see)
+							jointAxis.push_back(currentEvent.origin_index);
+					}
+				}
+				for (; index <= indexe; index++) {
+					auto& currentEvent = es[searching_index[index]];
+					if (!(see < currentEvent || currentEvent < ses))
+						jointAxis.push_back(es[searching_index[index]].origin_index);
+				}
 			}
 
 			if (jointAxis.empty()) return false;
@@ -110,7 +117,7 @@ namespace scu {
 		bool complete = false;
 		while (true) {
 			bool isLeft = e < es[searchingList[current]];
-			if (current == 0 || es[searchingList[current - 1]] <= e)
+			if (isLeft && (current == 0 || es[searchingList[current - 1]] <= e) || !isLeft && (current == length))
 				break;
 			step >>= 1;
 			if (step < 1) step = 1;
