@@ -58,10 +58,11 @@ namespace scu {
 		for (unsigned int i = 0, j = 1; i < _dimension; i = j++) {
 			jointAxis.clear();
 			auto& es = _events[i];
+			auto& esIndex = _events_dimension_index[i];
 			double& v0 = bound._min_bound_vertex[i];
 			double& v1 = bound._max_bound_vertex[i];
 			double& dim = bound._dim[i]; double& maxDim = _maxDim[i];
-			double extend = maxDim - dim;
+			double extend = maxDim - dim; extend = extend < 0.0 ? 0.0 : extend;
 			Event ses(-1, v0, EventType::START);
 			Event see(-1, v1, EventType::END);
 			Event sesex(-1, v0 - extend, EventType::START);
@@ -80,13 +81,18 @@ namespace scu {
 					if (currentEvent._type == EventType::START) {
 						auto& anotherIndex = esIndex[currentEvent.origin_index + _num_element];
 						auto& anotherEvent = es[anotherIndex];
-						if (anotherEvent <= seeex && anotherEvent >= see)
+						if (see <= anotherEvent && anotherEvent <= seeex)
 							jointAxis.push_back(currentEvent.origin_index);
 					}
 				}
-				for (; index <= indexe; index++) {
+				for (; index < indexe; index++) {
 					auto& currentEvent = es[searching_index[index]];
-					if (!(see < currentEvent || currentEvent < ses))
+					if (currentEvent._type == EventType::START) {
+						auto& anotherIndex = esIndex[currentEvent.origin_index + _num_element];
+						auto& anotherEvent = es[anotherIndex];
+						if (ses < anotherEvent && anotherEvent < see) continue;
+					}
+					if (ses < currentEvent && currentEvent < see)
 						jointAxis.push_back(es[searching_index[index]].origin_index);
 				}
 			}
