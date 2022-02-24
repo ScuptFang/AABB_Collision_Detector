@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.12)
 project(AABB_collision_detector)
 include_directories(${PROJECT_SOURCE_DIR}/AABB_collision_detector)
 add_executable(AABB_collision_detector
+AABB_collision_detector/Triangulation.cpp
 AABB_collision_detector/AABB_Collision_Detector.cpp
 AABB_collision_detector/main.cpp
 )

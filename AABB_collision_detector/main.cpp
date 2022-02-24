@@ -1,7 +1,8 @@
 #include "AABB_Collision_Detector.h"
+#include "Triangulation.h"
 #include <iostream>
 #include <ctime>
-int main(int argc, char** argv) {
+int TEST_AABB_CD(int argc, char** argv) {
 	std::vector<scu::Bound> bounds;
 	double dimiss = 0.001;
 	for (int i = 0; i < 1000000; i++) {
@@ -30,4 +31,28 @@ int main(int argc, char** argv) {
 	std::cout << "gungun cost:    " << t2e - t2s << " ms." << std::endl;
 	std::cout << "detect :        " << output.size() << " objects." << std::endl;
 	return 0;
+}
+
+int TEST_TRI(int argc, char** argv) {
+	std::vector<scu::Vertex> loop;
+	loop.push_back(scu::Vertex(1.0, -1.0, 0.0));
+	loop.push_back(scu::Vertex(1.0, 1.0, 0.0));
+	loop.push_back(scu::Vertex(-1.0, 1.0, 0.0));
+	loop.push_back(scu::Vertex(-1.0, -1.0, 0.0));
+	loop.push_back(scu::Vertex(-0.5, -1.0, 0.0));
+	loop.push_back(scu::Vertex(0.0, 0.8, 0.0));
+	loop.push_back(scu::Vertex(0.5, -1.0, 0.0));
+	scu::Vector3 normal(0.0, 0.0, 1.0);
+
+	std::vector<scu::Face> faces;
+	scu::Triangulation::GetIndexFromVertexLoop(loop, faces, normal);
+	std::cout << "Construct: " << faces.size() << " faces." << std::endl;
+	for (int i = 0; i < faces.size(); i++) {
+		std::cout << faces[i] << std::endl;
+	}
+	return 1;
+}
+
+int main(int argc, char** argv) {
+	return TEST_TRI(argc, argv);
 }
